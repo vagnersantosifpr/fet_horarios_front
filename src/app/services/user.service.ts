@@ -7,7 +7,7 @@ import { User } from '../models/auth.model';
   providedIn: 'root'
 })
 export class UserService {
-  private apiUrl = 'http://localhost:3000/api/auth';
+  private apiUrl = 'https://fet-horarios-back.onrender.com/api/auth';
 
   constructor(private http: HttpClient) {}
 

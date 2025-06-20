@@ -8,7 +8,7 @@ import { User, LoginRequest, RegisterRequest, AuthResponse } from '../models/aut
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:3000/api/auth';
+  private apiUrl = 'https://fet-horarios-back.onrender.com/api/auth';
   private readonly TOKEN_KEY = 'authToken'; // Chave para localStorage
 
   private currentUserSubject = new BehaviorSubject<User | null>(null);

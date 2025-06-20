@@ -14,7 +14,7 @@ interface DisciplinasResponse {
   providedIn: 'root'
 })
 export class DisciplinaService {
-  private apiUrl = 'http://localhost:3000/api/disciplinas';
+  private apiUrl = 'https://fet-horarios-back.onrender.com/api/disciplinas';
 
   constructor(private http: HttpClient) {}
 

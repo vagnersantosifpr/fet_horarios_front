@@ -18,7 +18,7 @@ export class AuthInterceptor implements HttpInterceptor {
   intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
     const token = this.authService.getToken();
     
-    if (token && request.url.startsWith('http://localhost:3000/api/')) { 
+    if (token && request.url.startsWith('https://fet-horarios-back.onrender.com/api/')) { 
       request = request.clone({
         setHeaders: {
           Authorization: `Bearer ${token}`

@@ -7,7 +7,7 @@ import { Sala } from '../models/data.model';
   providedIn: 'root'
 })
 export class SalaService {
-  private apiUrl = 'http://localhost:3000/api/salas';
+  private apiUrl = 'https://fet-horarios-back.onrender.com/api/salas';
 
   constructor(private http: HttpClient) {}
 
