@@ -11,10 +11,18 @@ import { Subscription, debounceTime, distinctUntilChanged, Subject } from 'rxjs'
 
 // Interface DisciplinasResponse aqui... (como antes)
 interface DisciplinasResponse {
-  data: Disciplina[];
-  totalPages: number;
+  data: {
+    disciplinas: Disciplina[];
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      totalPages: number;
+    };
+  };
+  success: boolean;
   currentPage: number;
-  totalItems?: number;
+
 }
 
 @Component({
@@ -690,6 +698,11 @@ export class DisciplinasComponent implements OnInit, OnDestroy { // Removido OnD
   modalErrorMessage = '';
   periodosDisponiveis: number[] = Array.from({ length: 12 }, (_, i) => i + 1);
 
+  // Debug properties
+  debugMode: boolean = false;
+  lastApiResponse: any = null;
+
+
   constructor(
     private disciplinaService: DisciplinaService,
     private authService: AuthService,
@@ -741,15 +754,67 @@ export class DisciplinasComponent implements OnInit, OnDestroy { // Removido OnD
     this.loading = true;
     this.globalErrorMessage = '';
 
+    console.log('🔄 Carregando disciplinas...');
+    console.log('📄 Página:', this.currentPage);
+    console.log('🔍 Termo de busca:', this.searchTerm);
+
     this.disciplinaService.getDisciplinas(this.currentPage, this.pageSize, this.searchTerm)
       .subscribe({
         next: (response: DisciplinasResponse) => {
-          this.disciplinas = response.data;
-          this.totalPages = response.totalPages;
-          this.currentPage = response.currentPage;
+          console.log('✅ Resposta da API recebida:', response);
+          console.log('📊 Tipo da resposta:', typeof response);
+          console.log('📋 É array?', Array.isArray(response));
+
+          this.lastApiResponse = response;
+
+          try {
+            // Tratar diferentes formatos de resposta
+            if (response && typeof response === 'object') {
+              if (response.data.disciplinas && Array.isArray(response.data.disciplinas)) {
+                // Formato esperado: { data: [], totalPages: number, currentPage: number }
+                console.log('📦 Formato padrão detectado');
+                this.disciplinas = response.data.disciplinas;
+                this.totalPages = response.data.pagination.totalPages || 1;
+                this.currentPage = 1;
+              } else if (Array.isArray(response)) {
+                // Resposta é um array direto
+                console.log('📋 Array direto detectado');
+                this.disciplinas = response;
+                this.totalPages = 1;
+                this.currentPage = 1;
+              } else if (response.data.disciplinas && Array.isArray(response.data.disciplinas)) {
+                // Formato alternativo: { disciplinas: [] }
+                console.log('📚 Formato alternativo detectado');
+                this.disciplinas = response.data.disciplinas;
+                this.totalPages = response.data.pagination.totalPages || 1;
+                this.currentPage = 1;
+              } else {
+                // Formato desconhecido
+                console.warn('⚠️ Formato de resposta desconhecido:', response);
+                this.disciplinas = [];
+              }
+            } else {
+              console.warn('⚠️ Resposta inválida');
+              this.disciplinas = [];
+            }
+            
+            console.log('📚 Total de disciplinas carregadas:', this.disciplinas.length);
+            console.log('📄 Páginas totais:', this.totalPages);
+            
+          } catch (error) {
+            console.error('❌ Erro ao processar resposta:', error);
+            this.disciplinas = [];
+          }
+          
           this.loading = false;
         },
         error: (err: HttpErrorResponse) => {
+          console.error('❌ Erro ao carregar disciplinas:', err);
+          console.error('🔢 Status:', err.status);
+          console.error('💬 Mensagem:', err.message);
+          console.error('📄 Corpo do erro:', err.error);
+          
+          
           this.globalErrorMessage = this.extractErrorMessage(err, 'Erro ao carregar disciplinas.');
           this.loading = false;
           this.disciplinas = [];

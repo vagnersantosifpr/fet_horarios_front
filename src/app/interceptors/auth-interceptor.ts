@@ -1,30 +1,30 @@
+// Alternativa usando função interceptor (Angular 15+)
 // src/app/interceptors/auth-interceptor.ts
-import { Injectable } from '@angular/core';
-import {
-  HttpRequest,
-  HttpHandler,
-  HttpEvent,
-  HttpInterceptor
-} from '@angular/common/http';
-import { Observable } from 'rxjs';
-// CORREÇÃO DO CAMINHO DO IMPORT:
-import { AuthService } from '../services/auth.service'; // <-- Use '../' para subir um nível
 
-@Injectable()
-export class AuthInterceptor implements HttpInterceptor {
+import { HttpInterceptorFn } from '@angular/common/http';
+import { inject } from '@angular/core';
+import { AuthService } from '../services/auth.service';
 
-  constructor(private authService: AuthService) {} // Este construtor é para a versão CLASSE
+export const authInterceptor: HttpInterceptorFn = (req, next) => {
+  const authService = inject(AuthService);
+  const token = authService.getToken();
 
-  intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
-    const token = this.authService.getToken();
+  // Verificar se a requisição é para a API e se há token disponível
+  if (token && (
+    req.url.startsWith('https://fet-horarios-back.onrender.com/api/') ||
+    req.url.includes('/api/') ||
+    req.url.includes('fet-horarios-back')
+  )) {
+    // Clonar a requisição e adicionar o cabeçalho Authorization
+    const authReq = req.clone({
+      setHeaders: {
+        Authorization: `Bearer ${token}`
+      }
+    });
     
-    if (token && request.url.startsWith('https://fet-horarios-back.onrender.com/api/')) { 
-      request = request.clone({
-        setHeaders: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-    }
-    return next.handle(request);
+    return next(authReq);
   }
-}
+
+  return next(req);
+};
+

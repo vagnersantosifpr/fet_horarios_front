@@ -11,10 +11,17 @@ import { Subscription, Subject, debounceTime, distinctUntilChanged } from 'rxjs'
 
 // Interface para a resposta da paginação do serviço de salas
 interface SalasResponse {
-  data: Sala[];
-  totalPages: number;
+  data: {
+      salas: Sala[];
+      pagination: {
+        page: number;
+        limit: number;
+        total: number;
+        totalPages: number;
+      };
+    };
+  success: boolean;
   currentPage: number;
-  totalItems?: number;
 }
 
 @Component({
@@ -623,6 +630,11 @@ export class SalasComponent implements OnInit, OnDestroy {
   tiposSalaOptions: { value: string; label: string }[] = Object.keys(this.tiposSalaMap)
     .map(key => ({ value: key, label: this.tiposSalaMap[key] }));
 
+      // Debug properties
+  debugMode: boolean = false;
+  lastApiResponse: any = null;
+
+
   constructor(
     private salaService: SalaService,
     private authService: AuthService,
@@ -679,12 +691,61 @@ export class SalasComponent implements OnInit, OnDestroy {
     this.salaService.getSalas(this.currentPage, this.pageSize, this.searchTerm)
       .subscribe({
         next: (response: SalasResponse) => {
-          this.salas = response.data;
-          this.totalPages = response.totalPages;
-          this.currentPage = response.currentPage;
-          this.loading = false;
+          console.log('✅ Resposta da API recebida:', response);
+          console.log('📊 Tipo da resposta:', typeof response);
+          console.log('📋 É array?', Array.isArray(response));
+
+          this.lastApiResponse = response;
+
+          try {
+            // Tratar diferentes formatos de resposta
+            if (response && typeof response === 'object') {
+              if (response.data.salas && Array.isArray(response.data.salas)) {
+                // Formato esperado: { data: [], totalPages: number, currentPage: number }
+                console.log('📦 Formato padrão detectado');
+                this.salas = response.data.salas;
+                this.totalPages = response.data.pagination.totalPages || 1;
+                this.currentPage = 1;
+              } else if (Array.isArray(response)) {
+                // Resposta é um array direto
+                console.log('📋 Array direto detectado');
+                this.salas = response;
+                this.totalPages = 1;
+                this.currentPage = 1;
+              } else if (response.data.salas && Array.isArray(response.data.salas)) {
+                // Formato alternativo: { disciplinas: [] }
+                console.log('📚 Formato alternativo detectado');
+                this.salas = response.data.salas;
+                this.totalPages = response.data.pagination.totalPages || 1;
+                this.currentPage = 1;
+              } else {
+                // Formato desconhecido
+                console.warn('⚠️ Formato de resposta desconhecido:', response);
+                this.salas = [];
+              }
+            } else {
+              console.warn('⚠️ Resposta inválida');
+              this.salas = [];
+            }
+            
+            console.log('📚 Total de salas carregadas:', this.salas.length);
+            console.log('📄 Páginas totais:', this.totalPages);
+            
+          } catch (error) {
+            console.error('❌ Erro ao processar resposta:', error);
+            this.salas = [];
+          }
+          
+
         },
         error: (err: HttpErrorResponse) => {
+
+          console.error('❌ Erro ao carregar salas:', err);
+          console.error('🔢 Status:', err.status);
+          console.error('💬 Mensagem:', err.message);
+          console.error('📄 Corpo do erro:', err.error);
+
+
           this.globalErrorMessage = this.extractErrorMessage(err, 'Erro ao carregar salas.');
           this.loading = false;
           this.salas = [];
