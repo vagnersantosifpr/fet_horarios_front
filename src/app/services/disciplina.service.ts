@@ -1,13 +1,46 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Disciplina } from '../models/data.model';
+//import { Disciplina } from '../models/data.model';
+
+export interface Disciplina {
+  _id: string;
+  codigo: string;
+  nome: string;
+  cargaHoraria: number;
+  creditos: number;
+  departamento: string;
+  periodo: number;
+  prerequisitos: Disciplina[];
+  ativa: boolean;
+  criadoEm: Date;
+  atualizadoEm: Date;
+}
 
 interface DisciplinasResponse {
   data: Disciplina[];
   totalPages: number;
   currentPage: number;
   totalItems?: number;
+}
+
+// Interface para as disciplinas selecionadas pelo professor
+export interface DisciplinaSelecionadaPeloProfessor {
+  disciplina: Disciplina; // O objeto disciplina completo
+  preferencia: number;
+}
+
+// Interface para um item de disponibilidade/restrição de horário
+// A interface `Preferencia` já define bem `disponibilidadeHorarios`
+// mas para clareza no componente:
+export interface DisponibilidadeItem {
+  diaSemana: string;
+  turno: string;
+  horarios: {
+    inicio: string;
+    fim: string;
+  }[];
+  disponivel: boolean; // Presente na interface Preferencia, mas não usada no form de adição
 }
 
 @Injectable({

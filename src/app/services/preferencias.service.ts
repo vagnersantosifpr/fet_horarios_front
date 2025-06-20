@@ -41,7 +41,7 @@ export class PreferenciasService {
   constructor(private http: HttpClient) { }
 
   // Obter minhas preferências
-  getMinhasPreferencias(): Observable<ApiResponse<Preferencia>> {
+  getMinhasPreferencias(): Observable<ApiResponse<Preferencia>> { // <--- CORRIGIDO AQUI
     return this.http.get<ApiResponse<Preferencia>>(`${this.apiUrl}/minhas-preferencias`);
   }
 

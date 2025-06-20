@@ -18,7 +18,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatTabsModule, MatTabGroup } from '@angular/material/tabs';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 
-// Assumindo que HorarioColetivoGerado e ParametrosGeracaoColetiva são definidos em horarios.service
+// Assumindo que HorarioColetivo e ParametrosGeracaoColetiva são definidos em horarios.service
 // e adaptados conforme as necessidades deste componente.
 import { HorariosService, ParametrosGeracaoColetiva, HorarioGerado } from '../../services/horarios.service';
 import { UserService } from '../../services/user.service'; // Para buscar professores
@@ -54,8 +54,8 @@ export interface Sala {
   // Outros campos relevantes
 }
 
-// Interface para HorarioColetivoGerado (adapte conforme sua estrutura real)
-// Se HorarioColetivoGerado já é importado e correto, não precisa redefinir.
+// Interface para HorarioColetivo (adapte conforme sua estrutura real)
+// Se HorarioColetivo já é importado e correto, não precisa redefinir.
 // Esta é apenas para ilustrar os campos esperados pelo template.
 export interface HorarioColetivoGeradoUi extends HorarioGerado {
   _id: string; // ID principal usado nas ações
