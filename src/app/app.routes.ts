@@ -7,10 +7,16 @@ import { DisciplinasComponent } from './components/admin/disciplinas.component';
 import { SalasComponent } from './components/admin/salas.component';
 import { UsuariosComponent } from './components/admin/usuarios.component';
 
+import { PublicPageComponent } from './components/public-page/public-page.component';
+
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
+  {
+    path: 'public',
+    component: PublicPageComponent
+  },
   { 
     path: 'dashboard', 
     component: DashboardComponent,
