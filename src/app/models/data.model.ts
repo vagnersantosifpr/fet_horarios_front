@@ -1,3 +1,19 @@
+export interface HorarioItem {
+  _id: string;
+  codigo: string;
+  nome: string;
+  cargaHoraria: number;
+  creditos: number;
+  departamento: string;
+  periodo: number;
+  prerequisitos: Disciplina[];
+  ativa: boolean;
+  criadoEm: Date;
+  atualizadoEm: Date;
+}
+
+
+
 export interface Disciplina {
   _id: string;
   codigo: string;

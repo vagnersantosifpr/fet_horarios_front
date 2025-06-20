@@ -9,6 +9,11 @@ import { UsuariosComponent } from './components/admin/usuarios.component';
 
 import { PublicPageComponent } from './components/public-page/public-page.component';
 
+import { PreferenciasComponent } from './components/preferencias/preferencias.component';
+import { MeusHorariosComponent } from './components/meus-horarios/meus-horarios.component';
+import { GerarHorarioComponent } from './components/gerar-horario/gerar-horario.component';
+
+
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -24,17 +29,17 @@ export const routes: Routes = [
   },
   { 
     path: 'preferencias', 
-    component: DashboardComponent,
+    component: PreferenciasComponent,
     canActivate: [AuthGuard]
   },
   { 
     path: 'horarios', 
-    component: DashboardComponent,
+    component: MeusHorariosComponent,
     canActivate: [AuthGuard]
   },
   { 
     path: 'gerar-horario', 
-    component: DashboardComponent,
+    component: GerarHorarioComponent,
     canActivate: [AuthGuard]
   },
   { 

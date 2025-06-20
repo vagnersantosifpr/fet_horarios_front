@@ -157,7 +157,7 @@ import { HttpErrorResponse } from '@angular/common/http';
       </footer>
     </div>
   `,
-  styleUrls: ['./public-page.component.scss'] 
+  styleUrls: ['./public-page.component.scss']  
 })
 export class PublicPageComponent implements OnInit {
   content: PublicContent | null = null;
