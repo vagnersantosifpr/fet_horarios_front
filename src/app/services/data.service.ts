@@ -27,7 +27,7 @@ export interface Timetable {
   providedIn: 'root'
 })
 export class DataService {
-  private apiUrl = environment.apiUrl;
+  private apiUrl = "https://fet-horarios-back.onrender.com/api";
 
   constructor(private http: HttpClient) { }
 

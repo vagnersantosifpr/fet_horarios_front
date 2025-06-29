@@ -1,4 +1,5 @@
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:3000/api' // Adjust if your backend runs on a different port
+  apiUrlLocal: 'http://localhost:3000/api', // Adjust if your backend runs on a different port
+  apiUrlProd: 'https://fet-horarios-back.onrender.com/api' // Adjust if your backend runs on a different port
 };
