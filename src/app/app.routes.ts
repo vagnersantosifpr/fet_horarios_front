@@ -9,6 +9,9 @@ import { UsuariosComponent } from './components/admin/usuarios.component';
 
 import { PublicPageComponent } from './components/public-page/public-page.component';
 
+import { GradePageComponent } from './components/grade/grade.component';
+
+
 import { PreferenciasComponent } from './components/preferencias/preferencias.component';
 import { MeusHorariosComponent } from './components/meus-horarios/meus-horarios.component';
 import { GerarHorarioComponent } from './components/gerar-horario/gerar-horario.component';
@@ -21,6 +24,10 @@ export const routes: Routes = [
   {
     path: 'public',
     component: PublicPageComponent
+  },
+  {
+    path: 'grade',
+    component: GradePageComponent
   },
   { 
     path: 'dashboard', 

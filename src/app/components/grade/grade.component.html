@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horário por Turma - IFPR Informática</title>
+    <!-- Styles are now handled by Angular (styles.css or component styles) -->
+</head>
+<body>
+
+    <h1>Horário Interativo por Turma - Técnico em Informática Integrado IFPR</h1>
+    <p>Arraste os cards das disciplinas para reorganizar o horário (salvamento no banco de dados).</p>
+
+    <div class="timetable-container">
+
+        <div *ngIf="isLoading" style="text-align: center; padding: 20px;">
+           <p>Carregando...</p>
+           <!-- Optional: Add a spinner -->
+        </div>
+
+        <div *ngIf="errorMessage" style="color: red; text-align: center; padding: 20px;">
+            {{ errorMessage }}
+        </div>
+
+        <!-- Iterate through turmasToDisplay and show the timetable component -->
+        <ng-container *ngIf="!isLoading && !errorMessage">
+             <app-timetable
+                *ngFor="let turmaConfig of turmasToDisplay"
+                [turmaTimetable]="turmaTimetables[turmaConfig.code]"
+                [disciplineMap]="disciplineMap"
+                [turmaTitle]="turmaConfig.title + ' (' + turmaConfig.code + ' - ' + currentSemester + ')'"
+             ></app-timetable>
+        </ng-container>
+
+    </div> <!-- Fim timetable-container -->
+
+    <!-- === Botão Salvar === -->
+    <div class="save-button-container">
+        <!-- Button is disabled while loading or if there's an error preventing display -->
+        <button id="saveButton" (click)="saveChanges()" [disabled]="isLoading || errorMessage !== null">
+            Salvar Alterações
+        </button>
+    </div>
+    <!-- === Fim Botão Salvar === -->
+
+    <!-- The script tag for script.js is no longer needed here -->
+
+</body>
+</html>

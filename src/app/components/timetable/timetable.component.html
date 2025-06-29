@@ -1,0 +1,71 @@
+<section class="turma-schedule">
+  <h2 class="turma-title">{{ turmaTitle }}</h2>
+
+  <!-- Check if data is NOT ready -->
+  <!-- Use the component method getDisciplineMapKeyCount() -->
+  @if (!turmaTimetable || this.getDisciplineMapKeyCount() === 0) {
+    <div style="text-align: center; padding: 20px;">
+      <!-- State 1: Loading (turmaTimetable is null, disciplineMapCount is 0) -->
+       @if (turmaTimetable === null && this.getDisciplineMapKeyCount() === 0) {
+           <p>Carregando dados...</p>
+       }
+       <!-- State 2: Timetable Not Found (turmaTimetable is null, disciplineMapCount > 0) -->
+       @else if (turmaTimetable === null && this.getDisciplineMapKeyCount() > 0) {
+            <p>Horário não encontrado para {{ turmaTitle }}.</p>
+       }
+       <!-- State 3: Discipline Data Error (disciplineMapCount is 0, timetable is not null - less likely but possible) -->
+       @else if (this.getDisciplineMapKeyCount() === 0 && turmaTimetable !== null) {
+            <p>Erro ao carregar dados das disciplinas.</p>
+       }
+       <!-- State 4: Initial Loading (turmaTimetable is undefined initially, disciplineMapCount is 0) -->
+       @else {
+            <p>Carregando horário...</p>
+       }
+    </div>
+  }
+
+  <!-- Display table ONLY if BOTH timetable data and discipline data are available -->
+  <!-- Use the component method getDisciplineMapKeyCount() -->
+  @if (turmaTimetable && (this.getDisciplineMapKeyCount() > 0)) {
+    <table>
+      <thead>
+        <tr>
+          <th class="time-header-col">Horário</th>
+          @for (dia of dias; track dia) {
+            <th>{{ dia | titlecase }}</th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of timetableRows; track row) {
+          @if (row.isAfternoonSeparator) {
+            <tr class="afternoon-separator">
+               <td [attr.colspan]="dias.length + 1">{{ row.timeLabel }}</td>
+            </tr>
+          } @else {
+            <tr [class.afternoon-row]="row.isAfternoonRow">
+              <td class="time-label" [class.afternoon-label]="row.isAfternoonRow">{{ row.timeLabel }}</td>
+              @for (slot of row.slots; track slot.id) {
+                <td [ngClass]="getSlotClasses(slot)"
+                    cdkDropList
+                    [cdkDropListData]="slot"
+                    [cdkDropListConnectedTo]="getConnectedListIds(slot)"
+                    (cdkDropListDropped)="drop($event)">
+
+                    @if (slot.discipline) {
+                         <div [ngClass]="getCardClasses(slot.discipline)"
+                              cdkDrag
+                              [cdkDragData]="slot"
+                              >
+                              {{ slot.discipline.shortName }} ({{ slot.discipline.blockHours }}h)
+                         </div>
+                    }
+                </td>
+              }
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  }
+</section>
