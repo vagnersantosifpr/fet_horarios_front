@@ -2,7 +2,7 @@ import { Component, Input, OnInit, OnChanges, SimpleChanges } from '@angular/cor
 import { CommonModule } from '@angular/common'; // Importar CommonModule
 import { DragDropModule, CdkDragDrop, moveItemInArray, transferArrayItem, CdkDropList, CdkDrag } from '@angular/cdk/drag-drop'; // Importar DragDropModule e tipos do CDK
 
-import { Discipline, Timetable } from '../../services/data.service';
+import { Discipline, Timetable } from '../../services/timetable.service';
 
 interface Slot {
   id: string; // e.g., 'seg_h1'
@@ -44,86 +44,155 @@ export class TimetableComponent implements OnInit, OnChanges {
   private horariosManha = ['h1', 'h2', 'h3', 'h4', 'h5'];
   private horariosTarde = ['h6', 'h7', 'h8', 'h9', 'h10'];
   private horariosValidosTarde: { [key: string]: string[] } = {
-      'ter': ['h6', 'h7', 'h8', 'h9', 'h10'],
-      'sex': ['h6']
+    'ter': ['h6', 'h7', 'h8', 'h9', 'h10'],
+    'sex': ['h6']
   };
-   private horarioLabels: { [key: string]: string } = {
-        h1: "H1 (07:30)", h2: "H2 (08:20)", h3: "H3 (09:25)",
-        h4: "H4 (10:15)", h5: "H5 (11:05)", h6: "H6 (Tarde)",
-        h7: "H7 (Tarde)", h8: "H8 (Tarde)", h9: "H9 (Tarde)",
-        h10: "H10 (Tarde)"
-   };
+  private horarioLabels: { [key: string]: string } = {
+    h1: "H1 (07:30)", h2: "H2 (08:20)", h3: "H3 (09:25)",
+    h4: "H4 (10:15)", h5: "H5 (11:05)", h6: "H6 (Tarde)",
+    h7: "H7 (Tarde)", h8: "H8 (Tarde)", h9: "H9 (Tarde)",
+    h10: "H10 (Tarde)"
+  };
 
 
   constructor() { }
 
   ngOnInit(): void {
-     if (this.turmaTimetable && this.getDisciplineMapKeyCount() > 0) {
-          this.generateTimetableRows();
-     }
+    if (this.turmaTimetable && this.getDisciplineMapKeyCount() > 0) {
+      this.generateTimetableRows();
+    }
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-     if (changes['turmaTimetable'] || changes['disciplineMap']) {
-        if (this.turmaTimetable && this.getDisciplineMapKeyCount()) { // Corrigido: use getDisciplineMapKeyCount()
-            this.generateTimetableRows();
-        } else {
-            this.timetableRows = []; // Clear if data is missing
-        }
-     }
+    if (changes['turmaTimetable'] || changes['disciplineMap']) {
+      if (this.turmaTimetable && this.getDisciplineMapKeyCount()) { // Corrigido: use getDisciplineMapKeyCount()
+        this.generateTimetableRows();
+      } else {
+        this.timetableRows = []; // Clear if data is missing
+      }
+    }
   }
 
   private generateTimetableRows(): void {
-     if (!this.turmaTimetable || !this.turmaTimetable.schedule
-         || this.getDisciplineMapKeyCount() === 0) {
-         this.timetableRows = [];
-         return;
-     }
+    if (!this.turmaTimetable || !this.turmaTimetable.schedule
+      || this.getDisciplineMapKeyCount() === 0) {
+      this.timetableRows = [];
+      return;
+    }
 
-     const rows: TimetableRow[] = [];
-     const allHorarios = [...this.horariosManha, ...this.horariosTarde];
-     const turmaCode = this.turmaTimetable.turmaCode;
-     // Use scheduleMap directly from the Timetable object
-     const scheduleMap = this.turmaTimetable.schedule;
+    const rows: TimetableRow[] = [];
+    const allHorarios = [...this.horariosManha, ...this.horariosTarde];
+    // Use o turmaCode para o objeto Slot (para referenciar a turma, útil no drop)
+    const turmaCode = this.turmaTimetable.turmaCode;
+    // Use o yearLevel para CONSTRUIR o slotId que EXISTE no scheduleMap
+    const yearLevel = this.turmaTimetable.yearLevel; // <-- Obtenha o nível do ano
+    const yearLevelPrefix = `${yearLevel}ano`;     // <-- Construa o prefixo correto (ex: "1ano")
 
-     allHorarios.forEach((hora, index) => {
-        if (hora === 'h6' && index > 0) {
-           rows.push({ timeLabel: 'TARDE', slots: [], isAfternoonSeparator: true });
-        }
+    const scheduleMap = this.turmaTimetable.schedule; // { "1ano_seg_h1": "port1_1ano_a", ... }
 
-        const isAfternoonRow = this.horariosTarde.includes(hora);
-        const slots: Slot[] = [];
 
-        this.dias.forEach(dia => {
-           // Reconstruct the old slot ID style for lookup in the schedule map
-           const slotId = `${turmaCode.toLowerCase().replace('iiw', '')}_${dia}_${hora}`;
-           const disciplineId = scheduleMap[slotId]; // Access scheduleMap using bracket notation
+    allHorarios.forEach((hora, index) => {
+      if (hora === 'h6' && index > 0) {
+        rows.push({ timeLabel: 'TARDE', slots: [], isAfternoonSeparator: true });
+      }
 
-           const discipline = disciplineId ? this.disciplineMap[disciplineId] || null : null;
+      const isAfternoonRow = this.horariosTarde.includes(hora);
+      const slots: Slot[] = [];
 
-           const isNonScheduledAfternoon = isAfternoonRow && (!this.horariosValidosTarde[dia] || !this.horariosValidosTarde[dia].includes(hora));
+      this.dias.forEach(dia => {
+        // CORREÇÃO AQUI: Construa o slotId usando o yearLevelPrefix
+        const slotId = `${yearLevelPrefix}_${dia}_${hora}`; // <-- Agora o slotId será "1ano_seg_h1", "2ano_seg_h1", etc.
 
-           slots.push({
-              id: slotId,
-              day: dia,
-              time: hora,
-              turma: turmaCode, // Use turmaCode from this.turmaTimetable
-              discipline: discipline,
-              isEmpty: !discipline,
-              isAfternoon: isAfternoonRow,
-              isNonScheduledAfternoon: isNonScheduledAfternoon // Add the new class flag
-           });
+        // Use o slotId CORRETO para buscar no scheduleMap
+        // É mais seguro usar .get() para Maps, mas [] pode funcionar dependendo da serialização
+//        const disciplineId = scheduleMap.get(slotId); // <-- Use .get() aqui! Ou mantenha scheduleMap[slotId] se preferir, mas .get() é o padrão para Maps
+          const disciplineId = scheduleMap?.[slotId]; // <-- Use scheduleMap?.[slotId]
+
+
+        // Agora, se disciplineId foi encontrado, ele será uma string como "port1_1ano_a"
+        // E a busca em this.disciplineMap[disciplineId] deve funcionar porque disciplineMap está populado
+        const discipline = disciplineId ? this.disciplineMap[disciplineId] || null : null;
+
+        const isNonScheduledAfternoon = isAfternoonRow && (!this.horariosValidosTarde[dia] || !this.horariosValidosTarde[dia].includes(hora));
+
+        slots.push({
+          // Mantenha o slotId gerado (que agora está correto) na propriedade id do slot
+          id: slotId,
+          day: dia,
+          time: hora,
+          turma: turmaCode, // Use o turmaCode original para a propriedade 'turma' do Slot
+          discipline: discipline,
+          isEmpty: !discipline,
+          isAfternoon: isAfternoonRow,
+          isNonScheduledAfternoon: isNonScheduledAfternoon // Add the new class flag
         });
+      });
 
-        rows.push({
-           timeLabel: this.horarioLabels[hora] || hora,
-           slots: slots,
-           isAfternoonRow: isAfternoonRow
+      rows.push({
+        timeLabel: this.horarioLabels[hora] || hora,
+        slots: slots,
+        isAfternoonRow: isAfternoonRow
+      });
+    });
+
+    this.timetableRows = rows;
+    // O console.log pode continuar usando turmaCode, pois ele identifica a turma
+    console.log(`Generated timetable rows for ${turmaCode} using schedule keys like ${yearLevelPrefix}_${this.dias[0]}_${this.horariosManha[0]}`);
+  }
+
+  // ... resto da classe TimetableComponent ...
+
+  private generateTimetableRowsAntigo(): void {
+    if (!this.turmaTimetable || !this.turmaTimetable.schedule
+      || this.getDisciplineMapKeyCount() === 0) {
+      this.timetableRows = [];
+      return;
+    }
+
+    const rows: TimetableRow[] = [];
+    const allHorarios = [...this.horariosManha, ...this.horariosTarde];
+    const turmaCode = this.turmaTimetable.turmaCode;
+    // Use scheduleMap directly from the Timetable object
+    const scheduleMap = this.turmaTimetable.schedule;
+
+    allHorarios.forEach((hora, index) => {
+      if (hora === 'h6' && index > 0) {
+        rows.push({ timeLabel: 'TARDE', slots: [], isAfternoonSeparator: true });
+      }
+
+      const isAfternoonRow = this.horariosTarde.includes(hora);
+      const slots: Slot[] = [];
+
+      this.dias.forEach(dia => {
+        // Reconstruct the old slot ID style for lookup in the schedule map
+        const slotId = `${turmaCode.toLowerCase().replace('iiw', '')}_${dia}_${hora}`;
+        const disciplineId = scheduleMap[slotId]; // Access scheduleMap using bracket notation
+
+        const discipline = disciplineId ? this.disciplineMap[disciplineId] || null : null;
+
+        const isNonScheduledAfternoon = isAfternoonRow && (!this.horariosValidosTarde[dia] || !this.horariosValidosTarde[dia].includes(hora));
+
+        slots.push({
+          id: slotId,
+          day: dia,
+          time: hora,
+          turma: turmaCode, // Use turmaCode from this.turmaTimetable
+          discipline: discipline,
+          isEmpty: !discipline,
+          isAfternoon: isAfternoonRow,
+          isNonScheduledAfternoon: isNonScheduledAfternoon // Add the new class flag
         });
-     });
+      });
 
-     this.timetableRows = rows;
-     console.log(`Generated timetable rows for ${turmaCode}`);
+      rows.push({
+        timeLabel: this.horarioLabels[hora] || hora,
+        slots: slots,
+        isAfternoonRow: isAfternoonRow
+      });
+    });
+
+    this.timetableRows = rows;
+    console.log(`Generated timetable rows for ${turmaCode}`);
   }
 
 
@@ -139,16 +208,16 @@ export class TimetableComponent implements OnInit, OnChanges {
     const targetSlotData: Slot = event.container.data;
 
     console.log('Drop event:', {
-         draggedFrom: draggedSlotData.id,
-         droppedOn: targetSlotData.id,
-         draggedDiscipline: draggedSlotData.discipline?.id || 'Empty',
-         targetDiscipline: targetSlotData.discipline?.id || 'Empty'
+      draggedFrom: draggedSlotData.id,
+      droppedOn: targetSlotData.id,
+      draggedDiscipline: draggedSlotData.discipline?.id || 'Empty',
+      targetDiscipline: targetSlotData.discipline?.id || 'Empty'
     });
 
     // --- Update the underlying timetable data model ---
     if (!this.turmaTimetable) {
-         console.error("Timetable data is not available to update.");
-         return;
+      console.error("Timetable data is not available to update.");
+      return;
     }
 
     const timetableSchedule = this.turmaTimetable.schedule;
@@ -167,21 +236,21 @@ export class TimetableComponent implements OnInit, OnChanges {
     const targetRow = this.timetableRows.find(row => row.slots.some(slot => slot.id === targetSlotData.id));
 
     if (sourceRow && targetRow) {
-        const sourceSlot = sourceRow.slots.find(slot => slot.id === draggedSlotData.id);
-        const targetSlot = targetRow.slots.find(slot => slot.id === targetSlotData.id);
+      const sourceSlot = sourceRow.slots.find(slot => slot.id === draggedSlotData.id);
+      const targetSlot = targetRow.slots.find(slot => slot.id === targetSlotData.id);
 
-        if (sourceSlot && targetSlot) {
-            // Update the discipline reference and empty status on the Slot objects
-            sourceSlot.discipline = targetDiscId ? this.disciplineMap[targetDiscId] : null;
-            sourceSlot.isEmpty = !sourceSlot.discipline;
+      if (sourceSlot && targetSlot) {
+        // Update the discipline reference and empty status on the Slot objects
+        sourceSlot.discipline = targetDiscId ? this.disciplineMap[targetDiscId] : null;
+        sourceSlot.isEmpty = !sourceSlot.discipline;
 
-            targetSlot.discipline = draggedDiscId ? this.disciplineMap[draggedDiscId] : null;
-            targetSlot.isEmpty = !targetSlot.discipline;
+        targetSlot.discipline = draggedDiscId ? this.disciplineMap[draggedDiscId] : null;
+        targetSlot.isEmpty = !targetSlot.discipline;
 
-            console.log(`Updated internal model and view for ${this.turmaTimetable.turmaCode} schedule.`);
-        }
+        console.log(`Updated internal model and view for ${this.turmaTimetable.turmaCode} schedule.`);
+      }
     } else {
-         console.error("Could not find source or target slots in the timetableRows array.");
+      console.error("Could not find source or target slots in the timetableRows array.");
     }
 
     // The save logic happens outside this component, typically on a button click in the parent (GradeComponent)
@@ -189,30 +258,30 @@ export class TimetableComponent implements OnInit, OnChanges {
 
   // Helper function to get the connected drop lists for a slot
   getConnectedListIds(currentSlot: Slot): string[] {
-      const allSlotIdsInTurma = this.timetableRows
-        .filter(row => !row.isAfternoonSeparator)
-        .flatMap(row => row.slots)
-        .map(slot => slot.id);
+    const allSlotIdsInTurma = this.timetableRows
+      .filter(row => !row.isAfternoonSeparator)
+      .flatMap(row => row.slots)
+      .map(slot => slot.id);
 
-      return allSlotIdsInTurma.filter(id => id !== currentSlot.id);
+    return allSlotIdsInTurma.filter(id => id !== currentSlot.id);
   }
 
   // Helper function to get the CSS class for a slot (td)
   getSlotClasses(slot: Slot): any {
-      return {
-          'timetable-slot': true,
-          'empty-slot': slot.isEmpty && !slot.isAfternoon,
-          'empty-afternoon': slot.isEmpty && slot.isAfternoon && !slot.isNonScheduledAfternoon,
-          'non-scheduled-afternoon': slot.isNonScheduledAfternoon,
-      };
+    return {
+      'timetable-slot': true,
+      'empty-slot': slot.isEmpty && !slot.isAfternoon,
+      'empty-afternoon': slot.isEmpty && slot.isAfternoon && !slot.isNonScheduledAfternoon,
+      'non-scheduled-afternoon': slot.isNonScheduledAfternoon,
+    };
   }
 
   // Helper function to get the CSS class for a card (div)
   getCardClasses(discipline: Discipline | null): any {
-     if (!discipline) return {};
-     return {
-         'discipline-card': true,
-         [discipline.cssClass || '']: true
-     };
+    if (!discipline) return {};
+    return {
+      'discipline-card': true,
+      [discipline.cssClass || '']: true
+    };
   }
 }

@@ -14,17 +14,242 @@
     /* pointer-events: none; /* Use this if you prevent drops */
 }
 
-/* Keep existing styles from your style.css for the rest */
-/* ... copy paste styles for .turma-schedule, table, th, td, .time-label, */
-/* .afternoon-separator, .afternoon-label, .afternoon-row, */
-/* .discipline-card, .discipline-card.dragging, .timetable-slot.drag-over, */
-/* .empty-slot, .empty-afternoon, .lang, .exact, .nature, .human, .info, .other, .info1, .info2, .info3, .info4 */
-/* And the button styles from the original style.css */
+/* === ESTILOS COPIADOS DO ORIGINAL style.css (RELACIONADOS À TABELA E CARDS) === */
 
- /* If you want to style the empty state placeholder text (optional) */
-/* .empty-placeholder {
+/* Seção de Horário por Turma */
+.turma-schedule {
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom: 30px; /* Espaçamento entre as tabelas das turmas */
+    padding: 15px;
+    overflow-x: auto; /* Permite rolagem horizontal se a tabela interna for larga */
+}
+
+.turma-title {
+    color: #004d40;
+    margin-top: 0;
+    margin-bottom: 15px;
+    text-align: center;
+    border-bottom: 2px solid #00796b;
+    padding-bottom: 5px;
+}
+
+/* Tabela dentro de cada seção */
+.turma-schedule table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed; /* Ajuda a manter as colunas fixas */
+    min-width: 700px; /* Largura mínima para evitar quebra excessiva */
+}
+
+/* Cabeçalho da Tabela (Dias) */
+.turma-schedule th {
+    background-color: #00796b;
+    color: white;
+    padding: 10px 6px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 0.85em;
+    border: 1px solid #004d40;
+    white-space: nowrap; /* Evita quebra de texto nos dias */
+}
+.turma-schedule th.time-header-col {
+     background-color: #004d40; /* Cor diferente para header de horário */
+     width: 12%; /* Largura da coluna de horário */
+}
+
+
+/* Células da Tabela (Slots e Labels de Hora) */
+.turma-schedule td {
+    border: 1px solid #ddd;
+    padding: 2px; /* Espaço mínimo para o card */
+    vertical-align: top;
+    height: 80px; /* Altura da célula para caber o card */
+    text-align: center;
+    font-size: 0.8em;
+}
+
+/* Célula do Horário (Primeira coluna) */
+.turma-schedule td.time-label {
+    font-weight: bold;
+    background-color: #e0f2f1;
+    vertical-align: middle;
+    text-align: center;
+    padding: 8px 5px;
+    font-size: 0.8em;
+    border-right: 2px solid #a5d6a7;
+    white-space: nowrap; /* Evita quebra no label do horário */
+}
+
+/* Slots normais
+.timetable-slot {
+     /* Estilo padrão já definido em TD */
+/*} */
+
+/* --- Estilos da Tarde --- */
+
+/* Linha separadora antes da tarde */
+.afternoon-separator td {
+    height: 15px;
+    padding: 2px;
+    border: none; /* Removendo bordas para um separador mais limpo */
+    background-color: #004d40; /* Separador Verde escuro */
+    color: white;
+    text-align: center;
+    font-weight: bold;
+    font-size: 0.8em;
+    vertical-align: middle;
+}
+
+/* Rótulo de horário da tarde */
+td.afternoon-label {
+    background-color: #c8e6c9; /* Verde mais escuro para labels da tarde */
+    border-right: 2px solid #81c784;
+}
+td.time-label.afternoon-label {
+    font-size: 0.75em; /* Fonte menor para caber melhor */
+}
+
+
+/* Slots específicos da tarde (Terça e Sexta H6+) */
+.timetable-slot.afternoon-slot {
+     background-color: #e8f5e9; /* Fundo levemente diferente */
+}
+
+/* Slots da tarde vazios ou placeholders */
+.timetable-slot.empty-afternoon {
+    background-color: #dcedc8; /* Um pouco mais escuro que slot normal da tarde */
+}
+
+/* Slots Vazios da Manhã */
+.timetable-slot.empty-slot {
+    background-color: #fafafa; /* Quase branco */
+}
+
+
+/* Slots indisponíveis (fora da tarde de terça/manhã normal) */
+/* Esta classe pode não ser usada pela sua lógica atual, mas mantemos caso queira reintroduzir */
+/*
+.timetable-slot.unavailable {
+    background-color: #f0f0f0;
+    cursor: not-allowed;
+}
+.afternoon-row .timetable-slot.unavailable { /* Indisponível na linha da tarde */
+/*    background-color: #e0e0e0; /* Cinza um pouco mais escuro para indisponível da tarde */
+/*}
+*/
+
+
+/* Cards de Disciplina */
+.discipline-card {
+    background-color: #b2dfdb; border: 1px solid #4db6ac;
+    border-radius: 4px; padding: 5px; margin: 2px;
+    font-size: 0.85em; cursor: grab; text-align: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+    word-wrap: break-word;
+    min-height: 60px; /* Ajuste conforme altura da célula, para cards de 1h e 2h */
+    display: flex; /* Usar flexbox para centralizar conteúdo */
+    flex-direction: column;
+    justify-content: center; /* Centraliza verticalmente */
+    align-items: center; /* Centraliza horizontalmente o texto */
+    position: relative; z-index: 1; /* Necessário para drag/drop */
+}
+.discipline-card:hover { box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 10; }
+
+/* Cores por Área */
+.discipline-card.lang { background-color: #ffecb3; border-color: #ffd54f; } /* Linguagens */
+.discipline-card.exact { background-color: #bbdefb; border-color: #64b5f6; } /* Exatas */
+.discipline-card.nature { background-color: #c8e6c9; border-color: #81c784; } /* Natureza */
+.discipline-card.human { background-color: #ffcdd2; border-color: #e57373; } /* Humanas */
+.discipline-card.info { background-color: #d1c4e9; border-color: #9575cd; } /* Informática */
+.discipline-card.other { background-color: #f5f5f5; border-color: #e0e0e0; } /* Outras (EdFis, Arte) */
+
+
+/* Estilo para card INFO por professor (borda esquerda) */
+.discipline-card.info1 { border-left: 4px solid #7e57c2; }
+.discipline-card.info2 { border-left: 4px solid #5c6bc0; }
+.discipline-card.info3 { border-left: 4px solid #42a5f5; }
+.discipline-card.info4 { border-left: 4wd solid #26a69a; } /* Corrigido aqui (4wd -> 4px) */
+
+
+/* Placeholder para aulas movidas (se usado - sua lógica TS atual não cria este placeholder) */
+/*
+.discipline-card.moved-placeholder {
+     background-color: #e0e0e0;
+     border-color: #bdbdbd;
+     border-style: dashed;
+     opacity: 0.7;
+     font-size: 0.7em;
+     font-style: italic;
+     cursor: default;
+     color: #616161;
+     display: flex; flex-direction: column; justify-content: center; align-items: center;
+}
+*/
+
+/* Estilo do Card enquanto está sendo arrastado (provided by CDK) */
+.cdk-drag-preview {
+  box-sizing: border-box;
+  border-radius: 4px;
+  box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
+              0 8px 10px 1px rgba(0, 0, 0, 0.14),
+              0 3px 14px 2px rgba(0, 0, 0, 0.12);
+  padding: 5px;
+  text-align: center;
+  font-size: 0.85em;
+  word-wrap: break-word;
+  /* Estilos para o card flutuante */
+  /* Você pode querer copiar as cores e fontes do .discipline-card aqui */
+}
+
+
+/* Estilo do Placeholder de onde o card foi arrastado (provided by CDK) */
+.cdk-drag-placeholder {
+  opacity: 0.4; /* Deixa transparente o local de onde saiu */
+  background: #ccc; /* Fundo cinza no local de onde saiu */
+  border: dashed 3px #999; /* Borda tracejada */
+}
+
+/* Estilo do Slot quando um card está sobre ele (provided by CDK) */
+.timetable-slot.cdk-drop-list-dragging .discipline-card:not(.cdk-drag-placeholder) {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+/* .timetable-slot.drag-over.cdk-drop-list-dragging .discipline-card:last-child {
+  /* Estilo para o card que já estava no slot quando outro card está sendo arrastado sobre ele */
+  /* Se você não quer que o card existente se mova para dar espaço, remova esta regra */
+  /* transform: translate3d(0, 10px, 0); */
+/* } */
+
+
+/* Estilo do Slot quando um card está sendo arrastado */
+.cdk-drop-list-dragging .timetable-slot:not(.cdk-drag-dropping) {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+/* Estilo do Slot quando o drag terminou e o item está "caindo" no lugar */
+.cdk-drag-animating {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+/* Estilo do Slot quando um card está sobre ele (provided by CDK) */
+.timetable-slot.drag-over {
+    background-color: #a5d6a7 !important; /* Verde claro para indicar drop válido */
+    border-style: dashed;
+}
+
+
+/* If you want to style the empty state placeholder text (optional) */
+/*
+.empty-placeholder {
     color: #999;
     font-style: italic;
     font-size: 0.7em;
     padding-top: 10px;
-} */
+    pointer-events: none; // Não interfere com o drag/drop
+    user-select: none; // Não permite seleção de texto
+}
+*/

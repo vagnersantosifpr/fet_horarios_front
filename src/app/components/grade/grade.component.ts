@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common'; // Importar CommonModule
 import { HttpClientModule } from '@angular/common/http'; // Importar HttpClientModule (pelo DataService)
 
-import { DataService, Discipline, Timetable } from '../../services/data.service';
+import { DataService, Discipline, Timetable } from '../../services/timetable.service';
 import { forkJoin } from 'rxjs';
 
 // Importar o TimetableComponent (já que ele é usado no template do GradeComponent)
